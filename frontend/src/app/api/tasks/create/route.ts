@@ -1,3 +1,4 @@
+import { NextResponse } from "next/server";
 import { getServerSession } from "@/server/session";
 import { buildBackendAuthHeaders } from "@/lib/backend-auth";
 import { backendTraceHeaders } from "@/server/backend-api";
