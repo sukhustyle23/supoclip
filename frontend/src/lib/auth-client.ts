@@ -1,19 +1,48 @@
+
 import { createAuthClient } from "better-auth/react";
-import { useSyncExternalStore } from "react";
 
 export const authClient = createAuthClient();
 
-export const { signIn, signOut, signUp, requestPasswordReset, resetPassword } = authClient;
+export const {
+  signIn,
+  signOut,
+  signUp,
+  requestPasswordReset,
+  resetPassword,
+} = authClient;
 
-const subscribeToHydration = () => () => {};
-const clientSnapshot = () => true;
-const serverSnapshot = () => false;
+// Temporary no-login UI mode
+const LOCAL_USER_ID = "00000000-0000-4000-8000-000000000001";
 
-export function useSession(...args: Parameters<typeof authClient.useSession>) {
-  const session = authClient.useSession(...args);
-  const hydrated = useSyncExternalStore(subscribeToHydration, clientSnapshot, serverSnapshot);
+const localSession = {
+  user: {
+    id: LOCAL_USER_ID,
+    name: "Local User",
+    email: "local@example.invalid",
+    emailVerified: true,
+    image: null,
+    createdAt: new Date(0),
+    updatedAt: new Date(0),
+    is_admin: false,
+  },
+  session: {
+    id: "local-session",
+    token: "local-session",
+    userId: LOCAL_USER_ID,
+    expiresAt: new Date("2099-01-01"),
+    createdAt: new Date(0),
+    updatedAt: new Date(0),
+  },
+};
 
-  // A sibling can resolve the shared auth store before this component hydrates.
-  // Match the server's loading state until this consumer finishes hydration.
-  return hydrated ? session : { ...session, data: null, isPending: true };
+export function useSession(
+  ..._args: Parameters<typeof authClient.useSession>
+) {
+  return {
+    data: localSession,
+    isPending: false,
+    isRefetching: false,
+    error: null,
+    refetch: async () => {},
+  } as unknown as ReturnType<typeof authClient.useSession>;
 }
